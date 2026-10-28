@@ -1,0 +1,22 @@
+# Keep the build context small: the image is built from pom.xml + src/ only
+target/
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+*.log
+
+# Not needed inside the image
+Jenkinsfile
+docker-compose.yml
+nginx/
+README.md
+docs/
+*.docx
+*.pdf
+
+# Never send local secrets into the build
+.env
+*.env
+docker_pat.txt
