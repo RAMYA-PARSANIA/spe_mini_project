@@ -1,0 +1,58 @@
+# Full stack: 2 calculator replicas behind an nginx reverse proxy.
+#   docker compose up -d        -> start everything
+#   curl "http://localhost:8081/api/v1/add?a=2&b=3"
+#
+# DOCKER_IMAGE / IMAGE_TAG are set by Jenkins on every deploy (IMAGE_TAG = build number).
+# Without them, the latest image published on Docker Hub is used.
+
+name: calculator   # fixed project name, so every Jenkins re-run updates the same stack
+
+services:
+  calculator:
+    image: ${DOCKER_IMAGE:-itsrp/calculator}:${IMAGE_TAG:-latest}
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 512M
+    environment:
+      SERVER_PORT: 8080
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: never
+      TZ: Asia/Kolkata
+    # Not published on the host: the API is reachable only through nginx
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - calc-net
+
+  nginx:
+    build: ./nginx
+    image: calculator-nginx:local
+    pull_policy: build
+    depends_on:
+      calculator:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-8081}:80"
+    environment:
+      TZ: Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - calc-net
+
+networks:
+  calc-net:
+    driver: bridge
