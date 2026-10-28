@@ -1,0 +1,43 @@
+# ---- Maven / build output ----
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+
+# ---- IDEs ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+out/
+bin/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Secrets: never commit these ----
+.env
+*.env
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+docker_pat.txt
+
+# ---- Course material (not part of the project) ----
+problem_statement.pdf
+SPE_Mini_Project.docx
