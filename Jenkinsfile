@@ -109,12 +109,12 @@ pipeline {
                 withEnv(["IMAGE_TAG=${BUILD_NUMBER}"]) {
                     // Idempotent: Compose only recreates containers whose image/config changed.
                     // --wait blocks until every service reports healthy (or fails after the timeout).
-                    cmd 'docker compose up -d --remove-orphans --wait --wait-timeout 180'
-                    cmd 'docker compose ps'
+                    cmd 'docker-compose up -d --remove-orphans --wait --wait-timeout 180'
+                    cmd 'docker-compose ps'
                 }
                 // Verify the full path nginx -> calculator from inside the proxy container
-                cmd 'docker compose exec -T nginx wget -qO- http://127.0.0.1/actuator/health'
-                cmd 'docker compose exec -T nginx wget -qO- "http://127.0.0.1/api/v1/add?a=2&b=3"'
+                cmd 'docker-compose exec -T nginx wget -qO- http://127.0.0.1/actuator/health'
+                cmd 'docker-compose exec -T nginx wget -qO- "http://127.0.0.1/api/v1/add?a=2&b=3"'
             }
             post {
                 failure {
@@ -125,7 +125,7 @@ pipeline {
                         if (previous) {
                             echo "Deploy failed - rolling back to build #${previous}"
                             withEnv(["IMAGE_TAG=${previous}"]) {
-                                cmd 'docker compose up -d --remove-orphans --wait --wait-timeout 180'
+                                cmd 'docker-compose up -d --remove-orphans --wait --wait-timeout 180'
                             }
                         }
                     }

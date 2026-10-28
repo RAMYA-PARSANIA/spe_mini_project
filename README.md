@@ -128,7 +128,7 @@ Variables (see [.env.example](.env.example)): `DOCKER_IMAGE`, `IMAGE_TAG` (defau
 | Test | `mvn -B test`; publishes `target/surefire-reports/*.xml`; a failing test fails the build |
 | Docker Build | `docker build` tagged `:<BUILD_NUMBER>` and `:latest` |
 | Push | `docker login` with Jenkins credentials `dockerhub-credentials`, pushes both tags |
-| Deploy | `docker compose up -d --wait`, then checks health and calls the API through nginx; rolls back to the last successful build if this fails |
+| Deploy | `docker-compose up -d --wait`, then checks health and calls the API through nginx; rolls back to the last successful build if this fails |
 
 Post actions e-mail the build result (success / failure with log attached).
 
