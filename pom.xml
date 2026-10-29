@@ -13,7 +13,7 @@
 
     <groupId>com.spe</groupId>
     <artifactId>calculator</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>calculator</name>
     <description>Calculator REST API with an end-to-end CI/CD pipeline (CSE 816 SPE mini-project)</description>
 
