@@ -62,9 +62,8 @@ $ curl "http://localhost:8081/api/v1/divide?a=5&b=0"
 Arithmetic uses `BigDecimal` (16 significant digits), so `0.1 + 0.2` returns `0.3` and
 `1 / 3` returns `0.3333333333333333`.
 
-**Web page:** open `http://localhost:8081/` for a small page with inputs for `a` and `b` and
-buttons for the four operations. It calls the same REST endpoints and also shows the health
-status, the app version and which replica served each request
+**Web page:** open `http://localhost:8081/` for a plain form with fields for `a` and `b` and an
+operation drop-down. It calls the same REST endpoint and shows the JSON response
 ([src/main/resources/static/index.html](src/main/resources/static/index.html)).
 
 ## Build, test and run locally

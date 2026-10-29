@@ -2,142 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calculator</title>
-  <style>
-    :root {
-      --bg: #f4f6fa; --card: #ffffff; --text: #1d2433; --muted: #667085;
-      --border: #d5dae3; --accent: #2f5cc4; --ok: #1a7f37; --err: #c4302b; --code: #f0f2f6;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #12151c; --card: #1b2029; --text: #e6e9ef; --muted: #98a2b3;
-        --border: #2e3542; --accent: #6b93f0; --ok: #4ac26b; --err: #f07167; --code: #232936;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 16px; background: var(--bg); color: var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    }
-    main {
-      width: 100%; max-width: 440px; background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 24px;
-    }
-    h1 { margin: 0 0 4px; font-size: 1.4rem; }
-    .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
-    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 4px; }
-    .dot.up { background: var(--ok); }
-    .dot.down { background: var(--err); }
-    .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 4px; }
-    input {
-      width: 100%; padding: 10px 12px; font-size: 1.1rem; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--bg); color: var(--text);
-    }
-    input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-    .ops { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
-    button {
-      padding: 12px 0; font-size: 1.3rem; border: 0; border-radius: 8px; cursor: pointer;
-      background: var(--accent); color: #fff;
-    }
-    button:hover { filter: brightness(1.1); }
-    .result { min-height: 3.2rem; font-size: 1.8rem; font-weight: 600; word-break: break-all; }
-    .result.error { font-size: 1rem; font-weight: 500; color: var(--err); }
-    .served { color: var(--muted); font-size: 0.8rem; min-height: 1rem; }
-    details { margin-top: 16px; font-size: 0.85rem; }
-    summary { cursor: pointer; color: var(--muted); }
-    pre { background: var(--code); padding: 10px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
-  </style>
 </head>
 <body>
-<main>
-  <h1>Calculator</h1>
-  <div class="meta">
-    <span class="dot" id="health-dot"></span><span id="health">checking health…</span>
-    · <span id="version">version –</span>
-  </div>
+<h1>Calculator</h1>
 
-  <div class="inputs">
-    <div>
-      <label for="a">a</label>
-      <input id="a" inputmode="decimal" value="2" autocomplete="off">
-    </div>
-    <div>
-      <label for="b">b</label>
-      <input id="b" inputmode="decimal" value="3" autocomplete="off">
-    </div>
-  </div>
+<form id="calc">
+  <p>a: <input id="a" name="a"></p>
+  <p>b: <input id="b" name="b"></p>
+  <p>Operation:
+    <select id="op">
+      <option value="add">add</option>
+      <option value="subtract">subtract</option>
+      <option value="multiply">multiply</option>
+      <option value="divide">divide</option>
+    </select>
+  </p>
+  <button type="submit">Calculate</button>
+</form>
 
-  <div class="ops">
-    <button type="button" data-op="add" title="Add">+</button>
-    <button type="button" data-op="subtract" title="Subtract">−</button>
-    <button type="button" data-op="multiply" title="Multiply">×</button>
-    <button type="button" data-op="divide" title="Divide">÷</button>
-  </div>
-
-  <div class="result" id="result" aria-live="polite"></div>
-  <div class="served" id="served"></div>
-
-  <details>
-    <summary>Raw API response</summary>
-    <pre id="raw">Click an operation to call the API.</pre>
-  </details>
-</main>
+<pre id="response"></pre>
 
 <script>
-  // The page only calls the same REST API that curl uses: GET /api/v1/{op}?a=&b=
-  const resultEl = document.getElementById('result');
-  const rawEl = document.getElementById('raw');
-  const servedEl = document.getElementById('served');
-  const symbols = { add: '+', subtract: '−', multiply: '×', divide: '÷' };
-
-  async function calculate(op) {
-    const a = document.getElementById('a').value.trim();
-    const b = document.getElementById('b').value.trim();
-    const url = `/api/v1/${op}?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
-    try {
-      const res = await fetch(url);
-      const body = await res.json();
-      if (res.ok) {
-        resultEl.className = 'result';
-        resultEl.textContent = `${body.a} ${symbols[op]} ${body.b} = ${body.result}`;
-      } else {
-        resultEl.className = 'result error';
-        resultEl.textContent = `HTTP ${res.status}: ${body.message}`;
-      }
-      // Set by the nginx proxy; shows which replica answered
-      const upstream = res.headers.get('X-Upstream-Server');
-      servedEl.textContent = upstream ? `served by replica ${upstream}` : '';
-      rawEl.textContent = `GET ${url}  →  ${res.status}\n\n${JSON.stringify(body, null, 2)}`;
-    } catch (e) {
-      resultEl.className = 'result error';
-      resultEl.textContent = 'Could not reach the API';
-      rawEl.textContent = String(e);
-    }
-  }
-
-  document.querySelectorAll('button[data-op]').forEach(btn =>
-    btn.addEventListener('click', () => calculate(btn.dataset.op)));
-
-  async function loadStatus() {
-    const dot = document.getElementById('health-dot');
-    const health = document.getElementById('health');
-    try {
-      const h = await (await fetch('/actuator/health')).json();
-      health.textContent = `health ${h.status}`;
-      dot.className = 'dot ' + (h.status === 'UP' ? 'up' : 'down');
-    } catch (e) {
-      health.textContent = 'health unknown';
-      dot.className = 'dot down';
-    }
-    try {
-      const info = await (await fetch('/actuator/info')).json();
-      document.getElementById('version').textContent = `version ${info.app.version}`;
-    } catch (e) { /* version is optional */ }
-  }
-  loadStatus();
+  // Calls GET /api/v1/{op}?a=&b= and prints the JSON response as-is
+  document.getElementById('calc').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const a = encodeURIComponent(document.getElementById('a').value);
+    const b = encodeURIComponent(document.getElementById('b').value);
+    const op = document.getElementById('op').value;
+    const res = await fetch(`/api/v1/${op}?a=${a}&b=${b}`);
+    document.getElementById('response').textContent = JSON.stringify(await res.json(), null, 2);
+  });
 </script>
 </body>
 </html>
