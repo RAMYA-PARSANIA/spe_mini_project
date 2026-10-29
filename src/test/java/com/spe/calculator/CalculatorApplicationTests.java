@@ -6,7 +6,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +36,13 @@ class CalculatorApplicationTests {
         mockMvc.perform(get("/api/v1/divide?a=1&b=0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Division by zero is not allowed"));
+    }
+
+    @Test
+    void webPageIsServed() throws Exception {
+        mockMvc.perform(get("/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<title>Calculator</title>")));
     }
 
     @Test
